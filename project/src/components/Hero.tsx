@@ -16,9 +16,9 @@ export const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(217_91%_60%_/_0.1),transparent)] animate-pulse" />
+      {/* Subtle overlay for better text readability */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-transparent to-black/10" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(217_91%_60%_/_0.05),transparent)]" />
       
       <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
         {/* Content */}
