@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cleanistic AI Widget Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .demo-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        .widget-container {
+            border: 2px dashed #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="demo-section">
+            <h1>Cleanistic AI Widget Integration Demo</h1>
+            <p>This page demonstrates how to embed the Cleanistic AI estimator widget into any website.</p>
+        </div>
+
+        <div class="demo-section">
+            <h2>Basic Integration</h2>
+            <p>Add these two lines to your HTML:</p>
+            <div class="code-block">
+&lt;script src="https://cdn.cleanistic.ai/widget.js"&gt;&lt;/script&gt;
+&lt;cleanistic-estimator company-id="demo" primary-color="#3b82f6"&gt;&lt;/cleanistic-estimator&gt;
+            </div>
+            
+            <div class="widget-container">
+                <h3>Live Widget Demo:</h3>
+                <div id="widget-demo"></div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Customization Options</h2>
+            <div class="code-block">
+&lt;cleanistic-estimator 
+  company-id="your-company-id"
+  api-key="your-api-key"
+  primary-color="#10b981"
+  secondary-color="#3b82f6"
+  company-name="ABC Cleaning Co"
+  enable-house-washing="true"
+  enable-roof-cleaning="true"
+  enable-gutter-cleaning="false"
+  require-address="true"&gt;
+&lt;/cleanistic-estimator&gt;
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Event Handling</h2>
+            <div class="code-block">
+&lt;script&gt;
+// Listen for estimate completion
+document.addEventListener('cleanistic:estimate-complete', (event) => {
+  const { analysisId, totalEstimate } = event.detail;
+  console.log('Estimate completed:', totalEstimate);
+  
+  // Redirect to contact form or show success message
+  window.location.href = `/contact?estimate=${analysisId}`;
+});
+
+// Listen for errors
+document.addEventListener('cleanistic:error', (event) => {
+  console.error('Estimator error:', event.detail.error);
+});
+&lt;/script&gt;
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>WordPress Integration</h2>
+            <p>For WordPress sites, use our shortcode:</p>
+            <div class="code-block">
+[cleanistic-estimator company_id="your-company-id" primary_color="#3b82f6"]
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>React Integration</h2>
+            <div class="code-block">
+import { CleanisticEstimator } from '@cleanistic/react-estimator';
+
+function App() {
+  return (
+    &lt;CleanisticEstimator
+      companyId="your-company-id"
+      config={{
+        branding: {
+          primaryColor: "#3b82f6",
+          companyName: "Your Cleaning Co"
+        }
+      }}
+      onEstimateComplete={(result) => {
+        console.log('Estimate:', result);
+      }}
+    /&gt;
+  );
+}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate the widget for demo purposes
+        document.getElementById('widget-demo').innerHTML = `
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; max-width: 500px;">
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <h3 style="color: #3b82f6; margin: 0 0 8px 0;">Demo Cleaning Co AI Estimator</h3>
+                    <p style="color: #6b7280; margin: 0; font-size: 14px;">Upload property photos for instant estimates</p>
+                </div>
+                <div style="border: 2px dashed #d1d5db; border-radius: 6px; padding: 24px; text-align: center; margin-bottom: 16px;">
+                    <div style="color: #9ca3af; margin-bottom: 12px;">📷</div>
+                    <p style="color: #6b7280; margin: 0 0 12px 0; font-size: 14px;">Drag and drop images here</p>
+                    <button style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                        Select Images
+                    </button>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 4px; font-size: 14px; font-weight: 500;">Services Needed:</label>
+                    <div style="display: flex; gap: 12px; font-size: 14px;">
+                        <label><input type="checkbox" checked> House Washing</label>
+                        <label><input type="checkbox"> Roof Cleaning</label>
+                        <label><input type="checkbox"> Gutter Cleaning</label>
+                    </div>
+                </div>
+                <button style="background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 6px; width: 100%; cursor: pointer; font-weight: 500;">
+                    Generate AI Estimate
+                </button>
+            </div>
+        `;
+    </script>
+</body>
+</html>
