@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Upload, Camera, Calculator, CheckCircle } from "lucide-react";
-import { ParticleAnimation } from "./ParticleAnimation";
 import { useNavigate } from "react-router-dom";
 
 export const Hero = () => {
@@ -24,23 +23,13 @@ export const Hero = () => {
         {/* Content */}
         <div className="space-y-8 animate-slide-up">
           <div className="space-y-4">
-            <div className="relative h-48 lg:h-64">
-              <ParticleAnimation 
-                text="Cleanistic AI"
-                className="absolute inset-0"
-                particleCount={300}
-                colors={['hsl(217, 91%, 60%)', 'hsl(142, 76%, 36%)', 'hsl(210, 40%, 98%)']}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-3xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent mb-2">
-                    Cleanistic AI
-                  </div>
-                  <div className="text-xl lg:text-3xl font-bold text-foreground">
-                    Instant Property Estimates
-                  </div>
-                </div>
-              </div>
+            <div className="text-center space-y-4">
+              <h1 className="text-4xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+                Cleanistic AI
+              </h1>
+              <h2 className="text-2xl lg:text-4xl font-bold text-foreground">
+                Instant Property Estimates
+              </h2>
             </div>
             <p className="text-xl text-muted-foreground max-w-lg">
               Revolutionary AI that counts windows, analyzes properties, and generates 
