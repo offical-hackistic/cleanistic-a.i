@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  apiKey      String   @unique
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Configuration
+  brandingConfig Json?
+  pricingConfig  Json?
+  featureConfig  Json?
+
+  // Relations
+  analyses    PropertyAnalysis[]
+  estimates   ServiceEstimate[]
+  subscription Subscription?
+
+  @@map("companies")
+}
+
+model PropertyAnalysis {
+  id                    String   @id @default(cuid())
+  companyId             String
+  images                String[] // S3 URLs
+  features              Json     // Detected features array
+  totalWindows          Int
+  totalDoors            Int
+  estimatedSquareFootage Int
+  confidence            Float
+  processingTime        Int      // milliseconds
+  propertyData          Json?    // Property lookup data
+  createdAt             DateTime @default(now())
+
+  // Relations
+  company   Company           @relation(fields: [companyId], references: [id])
+  estimates ServiceEstimate[]
+
+  @@map("property_analyses")
+}
+
+model ServiceEstimate {
+  id                String   @id @default(cuid())
+  analysisId        String
+  companyId         String
+  serviceType       String   // house_washing, roof_cleaning, gutter_cleaning
+  basePrice         Float
+  squareFootagePrice Float
+  windowPrice       Float
+  totalPrice        Float
+  breakdown         Json     // Estimate breakdown array
+  status            String   @default("pending") // pending, accepted, rejected
+  createdAt         DateTime @default(now())
+
+  // Relations
+  analysis PropertyAnalysis @relation(fields: [analysisId], references: [id])
+  company  Company          @relation(fields: [companyId], references: [id])
+
+  @@map("service_estimates")
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  companyId String   @unique
+  plan      String   // starter, professional, enterprise
+  status    String   // active, canceled, past_due
+  stripeId  String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@map("subscriptions")
+}
+
+model ApiUsage {
+  id          String   @id @default(cuid())
+  companyId   String
+  endpoint    String
+  requestCount Int     @default(1)
+  date        DateTime @default(now())
+
+  @@unique([companyId, endpoint, date])
+  @@map("api_usage")
+}
