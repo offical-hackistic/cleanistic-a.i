@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/72294f2a-9976-49de-98e2-647a64acc8a1
+https://cleanistic-a-i.vercel.app/
 
 ## How can I edit this code?
 
@@ -58,7 +58,4 @@ This project is built with:
 
 Simply run "npm run build"
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
 
