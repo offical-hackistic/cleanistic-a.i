@@ -255,12 +255,17 @@ export class EstimationService {
         gutterCleaning: {
           basePrice: 100,
           pricePerLinearFt: 3.50
+        },
+        windowCleaning: {
+          basePrice: 80,
+          pricePerWindow: 10
         }
       },
       features: {
         enableHouseWashing: true,
         enableRoofCleaning: true,
         enableGutterCleaning: true,
+        enableWindowCleaning: true,
         requireAddress: false,
         enablePropertyLookup: true
       }
