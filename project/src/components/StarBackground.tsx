@@ -1,105 +1,162 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
-interface Star {
-  id: number;
+type NodePoint = {
   x: number;
   y: number;
-  size: number;
-  speed: number;
-  opacity: number;
-  isShootingStar: boolean;
-  shootingOffset: number;
-}
+  vx: number;
+  vy: number;
+  r: number;
+  hub: boolean;
+};
 
 export const StarBackground = () => {
-  const [stars, setStars] = useState<Star[]>([]);
-  const [scrollY, setScrollY] = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const generateStars = () => {
-      const newStars: Star[] = [];
-      const starCount = 200;
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
-      for (let i = 0; i < starCount; i++) {
-        // Make about 15% of stars potential shooting stars
-        const isShootingStar = Math.random() < 0.15;
-        
-        newStars.push({
-          id: i,
-          x: Math.random() * 100,
-          y: Math.random() * 100,
-          size: Math.random() * 3 + 1,
-          speed: Math.random() * 0.5 + 0.1,
-          opacity: Math.random() * 0.8 + 0.2,
-          isShootingStar,
-          shootingOffset: Math.random() * 100, // When in scroll they start shooting
-        });
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let rafId = 0;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    const resize = () => {
+      const { clientWidth, clientHeight } = container;
+      canvas.width = Math.max(1, Math.floor(clientWidth * dpr));
+      canvas.height = Math.max(1, Math.floor(clientHeight * dpr));
+      canvas.style.width = clientWidth + 'px';
+      canvas.style.height = clientHeight + 'px';
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+    };
+
+    resize();
+    let width = container.clientWidth;
+    let height = container.clientHeight;
+
+    const onResize = () => {
+      resize();
+      width = container.clientWidth;
+      height = container.clientHeight;
+    };
+
+    window.addEventListener('resize', onResize);
+
+    // Create nodes
+    const nodeCount = Math.min(160, Math.floor((width * height) / 9000));
+    const nodes: NodePoint[] = Array.from({ length: nodeCount }, (_, i) => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      r: Math.random() * 1.5 + 0.6,
+      hub: i % Math.floor(12 + Math.random() * 8) === 0,
+    }));
+
+    // Mouse node (attractor)
+    const mouse = { x: width / 2, y: height / 2, active: false };
+    const onMouseMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+      mouse.active = true;
+    };
+    const onMouseLeave = () => { mouse.active = false; };
+
+    container.addEventListener('mousemove', onMouseMove);
+    container.addEventListener('mouseleave', onMouseLeave);
+
+    const maxLinkDist = 140;
+
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      // Links
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < maxLinkDist) {
+            const t = 1 - dist / maxLinkDist;
+            ctx.globalAlpha = 0.12 + t * 0.25;
+            ctx.strokeStyle = a.hub || b.hub ? 'rgba(59,130,246,0.5)' : 'rgba(148,163,184,0.45)'; // blue-500 or slate-400
+            ctx.lineWidth = 0.6 + t * (a.hub || b.hub ? 1.2 : 0.8);
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+
+        // Links to mouse
+        if (mouse.active) {
+          const dxm = a.x - mouse.x;
+          const dym = a.y - mouse.y;
+          const distm = Math.hypot(dxm, dym);
+          const near = Math.min(maxLinkDist * 0.9, 120);
+          if (distm < near) {
+            const t = 1 - distm / near;
+            ctx.globalAlpha = 0.1 + t * 0.3;
+            ctx.strokeStyle = 'rgba(99,102,241,0.55)'; // indigo-500
+            ctx.lineWidth = 0.5 + t * 1.2;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.stroke();
+          }
+        }
       }
 
-      setStars(newStars);
+      ctx.globalAlpha = 1;
+
+      // Nodes
+      for (const n of nodes) {
+        ctx.fillStyle = n.hub ? 'rgba(59,130,246,0.9)' : 'rgba(226,232,240,0.9)'; // blue-500 or slate-200
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.hub ? n.r + 0.8 : n.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (n.hub) {
+          ctx.fillStyle = 'rgba(59,130,246,0.2)';
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, (n.r + 0.8) * 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Update
+      for (const n of nodes) {
+        n.x += n.vx;
+        n.y += n.vy;
+
+        if (n.x <= 0 || n.x >= width) n.vx *= -1;
+        if (n.y <= 0 || n.y >= height) n.vy *= -1;
+      }
+
+      rafId = requestAnimationFrame(draw);
     };
 
-    generateStars();
-  }, []);
+    rafId = requestAnimationFrame(draw);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', onResize);
+      container.removeEventListener('mousemove', onMouseMove);
+      container.removeEventListener('mouseleave', onMouseLeave);
     };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      {/* Deep space background */}
+    <div ref={containerRef} className="fixed inset-0 overflow-hidden pointer-events-none z-0">
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800" />
-      
-      {/* Moving stars */}
-      {stars.map((star) => {
-        const isCurrentlyShootingStar = star.isShootingStar && scrollY > star.shootingOffset;
-        const shootingDistance = isCurrentlyShootingStar ? Math.min((scrollY - star.shootingOffset) * 0.5, 300) : 0;
-        
-        return (
-          <div
-            key={star.id}
-            className={`absolute rounded-full bg-white transition-all duration-300 ${
-              isCurrentlyShootingStar ? 'shadow-shooting-star' : 'animate-twinkle'
-            }`}
-            style={{
-              left: `${star.x + (isCurrentlyShootingStar ? shootingDistance * 0.3 : 0)}%`,
-              top: `${star.y + (isCurrentlyShootingStar ? shootingDistance * 0.2 : 0)}%`,
-              width: `${star.size + (isCurrentlyShootingStar ? 2 : 0)}px`,
-              height: `${star.size + (isCurrentlyShootingStar ? 2 : 0)}px`,
-              opacity: isCurrentlyShootingStar ? Math.max(star.opacity - shootingDistance * 0.01, 0.1) : star.opacity,
-              animationDuration: isCurrentlyShootingStar ? '0.5s' : `${2 + star.speed * 3}s`,
-              animationDelay: isCurrentlyShootingStar ? '0s' : `${star.speed * 2}s`,
-              boxShadow: isCurrentlyShootingStar 
-                ? `0 0 ${6 + shootingDistance * 0.1}px rgba(255, 255, 255, 0.8), ${shootingDistance * -0.5}px ${shootingDistance * -0.3}px ${shootingDistance * 0.2}px rgba(255, 255, 255, 0.3)`
-                : 'none',
-              transform: isCurrentlyShootingStar 
-                ? `rotate(${Math.atan2(shootingDistance * 0.2, shootingDistance * 0.3) * 180 / Math.PI + 45}deg) scaleX(${1 + shootingDistance * 0.05})`
-                : 'none',
-            }}
-          />
-        );
-      })}
-      
-      {/* Large glowing stars */}
-      <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-300 rounded-full animate-pulse opacity-60" />
-      <div className="absolute top-1/3 right-1/4 w-1 h-1 bg-purple-300 rounded-full animate-pulse opacity-80" 
-           style={{ animationDelay: '1s' }} />
-      <div className="absolute bottom-1/3 left-1/3 w-1.5 h-1.5 bg-cyan-300 rounded-full animate-pulse opacity-70" 
-           style={{ animationDelay: '2s' }} />
-      <div className="absolute top-1/2 right-1/3 w-1 h-1 bg-pink-300 rounded-full animate-pulse opacity-60" 
-           style={{ animationDelay: '0.5s' }} />
-      <div className="absolute bottom-1/4 right-1/6 w-2 h-2 bg-indigo-300 rounded-full animate-pulse opacity-50" 
-           style={{ animationDelay: '1.5s' }} />
-      
-      {/* Nebula-like background effects */}
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-purple-900/20 via-transparent to-transparent opacity-30" />
-      <div className="absolute bottom-0 right-0 w-full h-full bg-gradient-radial from-blue-900/20 via-transparent to-transparent opacity-40" />
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
     </div>
   );
 };
