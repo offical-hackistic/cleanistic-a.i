@@ -381,11 +381,23 @@ export const AIEstimator: React.FC<AIEstimatorProps> = ({
                     <Checkbox
                       id="gutter_cleaning"
                       checked={selectedServices.includes('gutter_cleaning')}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         handleServiceToggle('gutter_cleaning', checked as boolean)
                       }
                     />
                     <Label htmlFor="gutter_cleaning">Gutter Cleaning</Label>
+                  </div>
+                )}
+                {config.features.enableWindowCleaning && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="window_cleaning"
+                      checked={selectedServices.includes('window_cleaning')}
+                      onCheckedChange={(checked) =>
+                        handleServiceToggle('window_cleaning', checked as boolean)
+                      }
+                    />
+                    <Label htmlFor="window_cleaning">Window Cleaning</Label>
                   </div>
                 )}
               </div>
