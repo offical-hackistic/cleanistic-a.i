@@ -63,6 +63,10 @@ export const AIEstimator: React.FC<AIEstimatorProps> = ({
     
     if (files.length > 0) {
       setImages(prev => [...prev, ...files].slice(0, 5)); // Max 5 images
+      setImageSides(prev => {
+        const add = new Array(Math.min(files.length, 5)).fill('front');
+        return [...prev, ...add].slice(0, 5);
+      });
     }
   }, []);
 
