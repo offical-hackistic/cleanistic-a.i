@@ -25,6 +25,32 @@ export class EstimationService {
     }
   }
 
+  calculateEstimateFromMetrics(
+    metrics: { windowCount: number; gutterLengthFt?: number; wallAreaSqFt?: number },
+    serviceType: string,
+    config: EstimatorConfig
+  ): ServiceEstimate {
+    const squareFootage = Math.max(800, Math.min(5000, Math.round((metrics.wallAreaSqFt ?? 1600) / 2)));
+    switch (serviceType) {
+      case 'house_washing':
+        return this.calculateHouseWashing(metrics.windowCount ?? 0, 0, squareFootage, config);
+      case 'roof_cleaning':
+        return this.calculateRoofCleaning(squareFootage, config);
+      case 'gutter_cleaning': {
+        const pricing = config.pricing.gutterCleaning;
+        const linearFeet = Math.round(metrics.gutterLengthFt ?? Math.sqrt(squareFootage) * 4 * 1.2);
+        const breakdown: EstimateBreakdown[] = [
+          { item: 'Base Gutter Cleaning Service', quantity: 1, unitPrice: pricing.basePrice, totalPrice: pricing.basePrice },
+          { item: `Gutter Cleaning (${linearFeet} linear ft)`, quantity: linearFeet, unitPrice: pricing.pricePerLinearFt, totalPrice: linearFeet * pricing.pricePerLinearFt },
+        ];
+        const totalPrice = breakdown.reduce((s, i) => s + i.totalPrice, 0);
+        return { id: this.generateId(), analysisId: '', serviceType: 'gutter_cleaning', basePrice: pricing.basePrice, squareFootagePrice: linearFeet * pricing.pricePerLinearFt, windowPrice: 0, totalPrice: Math.round(totalPrice * 100) / 100, breakdown };
+      }
+      default:
+        throw new Error(`Unsupported service type: ${serviceType}`);
+    }
+  }
+
   private calculateHouseWashing(
     windows: number,
     doors: number,
