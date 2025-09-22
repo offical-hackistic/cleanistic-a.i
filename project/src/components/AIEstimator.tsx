@@ -34,6 +34,7 @@ export const AIEstimator: React.FC<AIEstimatorProps> = ({
 }) => {
   const [step, setStep] = useState<'upload' | 'processing' | 'results'>('upload');
   const [images, setImages] = useState<File[]>([]);
+  const [imageSides, setImageSides] = useState<string[]>([]);
   const [address, setAddress] = useState('');
   const [selectedServices, setSelectedServices] = useState<string[]>(['house_washing']);
   const [progress, setProgress] = useState(0);
