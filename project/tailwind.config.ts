@@ -84,11 +84,48 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'twinkle': {
+					'0%, 100%': { opacity: '0.2' },
+					'50%': { opacity: '1' }
+				},
+				'shooting-star': {
+					'0%': {
+						transform: 'translateX(-100px) translateY(-100px)',
+						opacity: '1',
+						boxShadow: '0 0 6px #fff'
+					},
+					'100%': {
+						transform: 'translateX(100vw) translateY(100vh)',
+						opacity: '0',
+						boxShadow: '0 0 6px #fff'
+					}
+				},
+				'shooting-star-delayed': {
+					'0%': {
+						transform: 'translateX(-100px) translateY(-100px)',
+						opacity: '0',
+						boxShadow: '0 0 4px #93c5fd'
+					},
+					'10%': {
+						opacity: '1'
+					},
+					'100%': {
+						transform: 'translateX(100vw) translateY(100vh)',
+						opacity: '0',
+						boxShadow: '0 0 4px #93c5fd'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'twinkle': 'twinkle 3s ease-in-out infinite',
+				'shooting-star': 'shooting-star 3s linear infinite',
+				'shooting-star-delayed': 'shooting-star-delayed 4s linear infinite 2s'
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
 			}
 		}
 	},

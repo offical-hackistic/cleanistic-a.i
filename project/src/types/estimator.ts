@@ -33,7 +33,7 @@ export interface PropertyAnalysis {
 export interface ServiceEstimate {
   id: string;
   analysisId: string;
-  serviceType: 'house_washing' | 'roof_cleaning' | 'gutter_cleaning';
+  serviceType: 'house_washing' | 'roof_cleaning' | 'gutter_cleaning' | 'window_cleaning';
   basePrice: number;
   squareFootagePrice: number;
   windowPrice: number;
@@ -81,11 +81,16 @@ export interface EstimatorConfig {
       basePrice: number;
       pricePerLinearFt: number;
     };
+    windowCleaning: {
+      basePrice: number;
+      pricePerWindow: number;
+    };
   };
   features: {
     enableHouseWashing: boolean;
     enableRoofCleaning: boolean;
     enableGutterCleaning: boolean;
+    enableWindowCleaning: boolean;
     requireAddress: boolean;
     enablePropertyLookup: boolean;
   };

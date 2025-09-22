@@ -20,6 +20,44 @@ export class EstimationService {
         return this.calculateRoofCleaning(squareFootage, config);
       case 'gutter_cleaning':
         return this.calculateGutterCleaning(squareFootage, config);
+      case 'window_cleaning':
+        return this.calculateWindowCleaning(windows, config);
+      default:
+        throw new Error(`Unsupported service type: ${serviceType}`);
+    }
+  }
+
+  calculateEstimateFromMetrics(
+    metrics: { windowCount: number; gutterLengthFt?: number; wallAreaSqFt?: number },
+    serviceType: string,
+    config: EstimatorConfig
+  ): ServiceEstimate {
+    const squareFootage = Math.max(800, Math.min(5000, Math.round((metrics.wallAreaSqFt ?? 1600) / 2)));
+    switch (serviceType) {
+      case 'house_washing':
+        return this.calculateHouseWashing(metrics.windowCount ?? 0, 0, squareFootage, config);
+      case 'roof_cleaning':
+        return this.calculateRoofCleaning(squareFootage, config);
+      case 'gutter_cleaning': {
+        const pricing = config.pricing.gutterCleaning;
+        const linearFeet = Math.round(metrics.gutterLengthFt ?? Math.sqrt(squareFootage) * 4 * 1.2);
+        const breakdown: EstimateBreakdown[] = [
+          { item: 'Base Gutter Cleaning Service', quantity: 1, unitPrice: pricing.basePrice, totalPrice: pricing.basePrice },
+          { item: `Gutter Cleaning (${linearFeet} linear ft)`, quantity: linearFeet, unitPrice: pricing.pricePerLinearFt, totalPrice: linearFeet * pricing.pricePerLinearFt },
+        ];
+        const totalPrice = breakdown.reduce((s, i) => s + i.totalPrice, 0);
+        return { id: this.generateId(), analysisId: '', serviceType: 'gutter_cleaning', basePrice: pricing.basePrice, squareFootagePrice: linearFeet * pricing.pricePerLinearFt, windowPrice: 0, totalPrice: Math.round(totalPrice * 100) / 100, breakdown };
+      }
+      case 'window_cleaning': {
+        const pricing = config.pricing.windowCleaning as any;
+        const windows = Math.max(0, Math.round(metrics.windowCount ?? 0));
+        const breakdown: EstimateBreakdown[] = [
+          { item: 'Base Window Cleaning Service', quantity: 1, unitPrice: pricing.basePrice, totalPrice: pricing.basePrice },
+          { item: `Window Cleaning (${windows} windows)`, quantity: windows, unitPrice: pricing.pricePerWindow, totalPrice: windows * pricing.pricePerWindow },
+        ];
+        const totalPrice = breakdown.reduce((s, i) => s + i.totalPrice, 0);
+        return { id: this.generateId(), analysisId: '', serviceType: 'window_cleaning', basePrice: pricing.basePrice, squareFootagePrice: 0, windowPrice: windows * pricing.pricePerWindow, totalPrice: Math.round(totalPrice * 100) / 100, breakdown };
+      }
       default:
         throw new Error(`Unsupported service type: ${serviceType}`);
     }
@@ -154,6 +192,44 @@ export class EstimationService {
     };
   }
 
+  private calculateWindowCleaning(
+    windows: number,
+    config: EstimatorConfig
+  ): ServiceEstimate {
+    const pricing = (config as any).pricing.windowCleaning;
+    const breakdown: EstimateBreakdown[] = [];
+
+    breakdown.push({
+      item: 'Base Window Cleaning Service',
+      quantity: 1,
+      unitPrice: pricing.basePrice,
+      totalPrice: pricing.basePrice,
+    });
+
+    const windowCharge = windows * pricing.pricePerWindow;
+    if (windows > 0) {
+      breakdown.push({
+        item: `Window Cleaning (${windows} windows)`,
+        quantity: windows,
+        unitPrice: pricing.pricePerWindow,
+        totalPrice: windowCharge,
+      });
+    }
+
+    const totalPrice = breakdown.reduce((sum, item) => sum + item.totalPrice, 0);
+
+    return {
+      id: this.generateId(),
+      analysisId: '',
+      serviceType: 'window_cleaning',
+      basePrice: pricing.basePrice,
+      squareFootagePrice: 0,
+      windowPrice: windowCharge,
+      totalPrice: Math.round(totalPrice * 100) / 100,
+      breakdown,
+    };
+  }
+
   private generateId(): string {
     return Math.random().toString(36).substr(2, 9);
   }
@@ -179,12 +255,17 @@ export class EstimationService {
         gutterCleaning: {
           basePrice: 100,
           pricePerLinearFt: 3.50
+        },
+        windowCleaning: {
+          basePrice: 80,
+          pricePerWindow: 10
         }
       },
       features: {
         enableHouseWashing: true,
         enableRoofCleaning: true,
         enableGutterCleaning: true,
+        enableWindowCleaning: true,
         requireAddress: false,
         enablePropertyLookup: true
       }
