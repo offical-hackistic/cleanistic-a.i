@@ -216,6 +216,7 @@ export const AIEstimator: React.FC<AIEstimatorProps> = ({
   const resetEstimator = () => {
     setStep('upload');
     setImages([]);
+    setImageSides([]);
     setAddress('');
     setSelectedServices(['house_washing']);
     setProgress(0);
