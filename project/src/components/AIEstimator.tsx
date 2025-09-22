@@ -73,6 +73,10 @@ export const AIEstimator: React.FC<AIEstimatorProps> = ({
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     setImages(prev => [...prev, ...files].slice(0, 5));
+    setImageSides(prev => {
+      const add = new Array(Math.min(files.length, 5)).fill('front');
+      return [...prev, ...add].slice(0, 5);
+    });
   };
 
   const removeImage = (index: number) => {
