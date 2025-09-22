@@ -192,6 +192,44 @@ export class EstimationService {
     };
   }
 
+  private calculateWindowCleaning(
+    windows: number,
+    config: EstimatorConfig
+  ): ServiceEstimate {
+    const pricing = (config as any).pricing.windowCleaning;
+    const breakdown: EstimateBreakdown[] = [];
+
+    breakdown.push({
+      item: 'Base Window Cleaning Service',
+      quantity: 1,
+      unitPrice: pricing.basePrice,
+      totalPrice: pricing.basePrice,
+    });
+
+    const windowCharge = windows * pricing.pricePerWindow;
+    if (windows > 0) {
+      breakdown.push({
+        item: `Window Cleaning (${windows} windows)`,
+        quantity: windows,
+        unitPrice: pricing.pricePerWindow,
+        totalPrice: windowCharge,
+      });
+    }
+
+    const totalPrice = breakdown.reduce((sum, item) => sum + item.totalPrice, 0);
+
+    return {
+      id: this.generateId(),
+      analysisId: '',
+      serviceType: 'window_cleaning',
+      basePrice: pricing.basePrice,
+      squareFootagePrice: 0,
+      windowPrice: windowCharge,
+      totalPrice: Math.round(totalPrice * 100) / 100,
+      breakdown,
+    };
+  }
+
   private generateId(): string {
     return Math.random().toString(36).substr(2, 9);
   }
