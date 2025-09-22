@@ -267,6 +267,23 @@ export const AIEstimator: React.FC<AIEstimatorProps> = ({
                       <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-2 py-1 rounded">
                         {Math.round(image.size / 1024)}KB
                       </div>
+                      <div className="mt-2">
+                        <label className="block text-xs text-muted-foreground mb-1">Image Side</label>
+                        <select
+                          className="w-full text-xs border rounded px-2 py-1 bg-background"
+                          value={imageSides[index] ?? 'front'}
+                          onChange={(e) => {
+                            const side = e.target.value;
+                            setImageSides(prev => prev.map((s, i) => i === index ? side : s));
+                          }}
+                        >
+                          <option value="front">Front</option>
+                          <option value="back">Back</option>
+                          <option value="left">Left</option>
+                          <option value="right">Right</option>
+                          <option value="roof">Roof</option>
+                        </select>
+                      </div>
                     </div>
                   ))}
                 </div>
