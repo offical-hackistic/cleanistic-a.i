@@ -20,6 +20,8 @@ export class EstimationService {
         return this.calculateRoofCleaning(squareFootage, config);
       case 'gutter_cleaning':
         return this.calculateGutterCleaning(squareFootage, config);
+      case 'window_cleaning':
+        return this.calculateWindowCleaning(windows, config);
       default:
         throw new Error(`Unsupported service type: ${serviceType}`);
     }
