@@ -48,6 +48,16 @@ export class EstimationService {
         const totalPrice = breakdown.reduce((s, i) => s + i.totalPrice, 0);
         return { id: this.generateId(), analysisId: '', serviceType: 'gutter_cleaning', basePrice: pricing.basePrice, squareFootagePrice: linearFeet * pricing.pricePerLinearFt, windowPrice: 0, totalPrice: Math.round(totalPrice * 100) / 100, breakdown };
       }
+      case 'window_cleaning': {
+        const pricing = config.pricing.windowCleaning as any;
+        const windows = Math.max(0, Math.round(metrics.windowCount ?? 0));
+        const breakdown: EstimateBreakdown[] = [
+          { item: 'Base Window Cleaning Service', quantity: 1, unitPrice: pricing.basePrice, totalPrice: pricing.basePrice },
+          { item: `Window Cleaning (${windows} windows)`, quantity: windows, unitPrice: pricing.pricePerWindow, totalPrice: windows * pricing.pricePerWindow },
+        ];
+        const totalPrice = breakdown.reduce((s, i) => s + i.totalPrice, 0);
+        return { id: this.generateId(), analysisId: '', serviceType: 'window_cleaning', basePrice: pricing.basePrice, squareFootagePrice: 0, windowPrice: windows * pricing.pricePerWindow, totalPrice: Math.round(totalPrice * 100) / 100, breakdown };
+      }
       default:
         throw new Error(`Unsupported service type: ${serviceType}`);
     }
