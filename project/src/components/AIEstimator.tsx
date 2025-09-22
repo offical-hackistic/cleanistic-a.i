@@ -81,6 +81,7 @@ export const AIEstimator: React.FC<AIEstimatorProps> = ({
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
+    setImageSides(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleServiceToggle = (service: string, checked: boolean) => {
